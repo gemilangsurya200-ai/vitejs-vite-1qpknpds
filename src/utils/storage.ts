@@ -1,4 +1,10 @@
-import type { AssessmentResult, UserProfile } from "../types";
+import type {
+  AssessmentResult,
+  DimensionScores,
+  PersonaType,
+  StudentAssessmentRecord,
+  UserProfile,
+} from "../types";
 
 const KEY_SESSION = "aem:session";
 const KEY_USERS = "aem:users";
@@ -29,6 +35,22 @@ function isUserProfile(v: unknown): v is UserProfile {
     typeof u.id === "string" &&
     typeof u.email === "string" &&
     typeof u.academicYear === "string"
+  );
+}
+
+function isAssessmentResult(v: unknown): v is AssessmentResult {
+  if (!v || typeof v !== "object") return false;
+  const result = v as Record<string, unknown>;
+  const scores = result.dimensionScores as Partial<DimensionScores> | undefined;
+  return (
+    typeof result.id === "string" &&
+    typeof result.timestamp === "string" &&
+    !!scores &&
+    ["frequency", "reliance", "transparency", "ethics", "autonomy"].every(
+      (key) => typeof scores[key as keyof DimensionScores] === "number"
+    ) &&
+    typeof result.persona === "string" &&
+    typeof result.dominantWeakness === "string"
   );
 }
 
@@ -84,4 +106,16 @@ export function getAssessmentHistory(): AssessmentResult[] {
 export function getLatestAssessment(): AssessmentResult | null {
   const history = getAssessmentHistory();
   return history.length ? history[history.length - 1] : null;
+}
+
+/** Returns the latest locally stored assessment for every registered student. */
+export function getAllStudentAssessmentRecords(): StudentAssessmentRecord[] {
+  const users = read<Record<string, unknown>>(KEY_USERS, {});
+  return Object.values(users).flatMap((value) => {
+    if (!isUserProfile(value)) return [];
+    const history = read<unknown>(keyHistory(value.id), []);
+    if (!Array.isArray(history)) return [];
+    const latest = [...history].reverse().find(isAssessmentResult);
+    return latest ? [{ user: value, result: latest }] : [];
+  });
 }

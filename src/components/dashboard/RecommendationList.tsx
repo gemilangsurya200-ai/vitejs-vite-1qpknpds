@@ -12,10 +12,12 @@ import {
   type Recommendation,
 } from "../../data/recommendations";
 import type { DimensionScores } from "../../types";
+import { translations, type Language } from "../../data/translations";
 
 interface RecommendationListProps {
   weakestDimension: keyof DimensionScores;
   scores: DimensionScores;
+  language: Language;
 }
 
 interface RecommendationCardProps {
@@ -23,6 +25,7 @@ interface RecommendationCardProps {
   score: number;
   checked: Record<string, boolean>;
   onToggle: (key: string) => void;
+  language: Language;
 }
 
 function RecommendationCard({
@@ -30,7 +33,9 @@ function RecommendationCard({
   score,
   checked,
   onToggle,
+  language,
 }: RecommendationCardProps) {
+  const copy = translations[language];
   const isPriority = item.level === "priority";
   const doneCount = item.actionItems.filter(
     (_, i) => checked[`${item.id}:${i}`]
@@ -48,14 +53,14 @@ function RecommendationCard({
         {isPriority && (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-gradient px-3 py-1 text-xs font-semibold text-white">
             <Target className="h-3.5 w-3.5" aria-hidden="true" />
-            Prioritas Perbaikan
+            {copy.priorityFix}
           </span>
         )}
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
           {DIMENSION_LABELS[item.dimension]}
         </span>
         <span className="ml-auto text-xs font-medium tabular-nums text-slate-400">
-          Skor {score}/100
+          {copy.scoreLabel} {score}/100
         </span>
       </header>
 
@@ -111,7 +116,7 @@ function RecommendationCard({
 
       <footer className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <span className="text-xs text-slate-500">
-          {doneCount}/{item.actionItems.length} aksi selesai
+          {doneCount}/{item.actionItems.length} {copy.actionsDone}
         </span>
 
         {item.resource && (
@@ -133,7 +138,9 @@ function RecommendationCard({
 export default function RecommendationList({
   weakestDimension,
   scores,
+  language,
 }: RecommendationListProps) {
+  const copy = translations[language];
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const plan = getRecommendationPlan(weakestDimension);
 
@@ -147,14 +154,14 @@ export default function RecommendationList({
           id="reco-heading"
           className="font-display text-xl font-bold text-slate-900"
         >
-          Rekomendasi Perbaikan
+          {copy.recommendationTitle}
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Fokus utama Anda saat ini:{" "}
+          {copy.recommendationFocus}{" "}
           <strong className="text-primary-700">
             {DIMENSION_LABELS[weakestDimension]}
           </strong>
-          . Centang aksi yang sudah Anda lakukan.
+          . {copy.recommendationHint}
         </p>
       </div>
 
@@ -166,6 +173,7 @@ export default function RecommendationList({
             score={scores[item.dimension]}
             checked={checked}
             onToggle={toggle}
+            language={language}
           />
         ))}
       </div>

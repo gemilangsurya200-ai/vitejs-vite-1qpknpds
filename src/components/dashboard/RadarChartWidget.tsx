@@ -9,9 +9,11 @@ import {
   type TooltipProps,
 } from "recharts";
 import type { DimensionKey, DimensionScores } from "../../types";
+import { translations, type Language } from "../../data/translations";
 
 interface RadarChartWidgetProps {
   scores: DimensionScores;
+  language: Language;
 }
 
 interface ChartDatum {
@@ -19,14 +21,6 @@ interface ChartDatum {
   label: string;
   value: number;
 }
-
-const DIMENSION_LABELS: Record<DimensionKey, string> = {
-  frequency: "Frekuensi Penggunaan",
-  reliance: "Porsi Kontribusi AI",
-  transparency: "Transparansi Sitasi",
-  ethics: "Kesadaran Etika",
-  autonomy: "Kemandirian Kognitif",
-};
 
 const ORDER: DimensionKey[] = [
   "frequency",
@@ -53,20 +47,31 @@ function ChartTooltip({ active, payload }: TooltipProps<number, string>) {
   );
 }
 
-export default function RadarChartWidget({ scores }: RadarChartWidgetProps) {
+export default function RadarChartWidget({
+  scores,
+  language,
+}: RadarChartWidgetProps) {
+  const copy = translations[language];
+  const dimensionLabels: Record<DimensionKey, string> = {
+    frequency: copy.dimensionFrequency,
+    reliance: copy.dimensionReliance,
+    transparency: copy.dimensionTransparency,
+    ethics: copy.dimensionEthics,
+    autonomy: copy.dimensionAutonomy,
+  };
   const data: ChartDatum[] = ORDER.map((key) => ({
     key,
-    label: DIMENSION_LABELS[key],
+    label: dimensionLabels[key],
     value: scores[key],
   }));
 
   return (
     <div className="rounded-xl2 border border-slate-100 bg-white p-5 shadow-card sm:p-6">
       <h3 className="font-display text-lg font-bold text-slate-900">
-        Peta Dimensi Etika AI
+        {copy.radarTitle}
       </h3>
       <p className="mt-1 text-sm text-slate-500">
-        Skala 0–100 pada lima dimensi penggunaan Generative AI Anda.
+        {copy.radarSubtitle}
       </p>
 
       <div className="mt-2 h-72 w-full sm:h-80">
@@ -100,9 +105,20 @@ export default function RadarChartWidget({ scores }: RadarChartWidgetProps) {
       </div>
 
       <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-500">
-        Frekuensi &amp; Porsi Kontribusi menunjukkan <strong>intensitas</strong>{" "}
-        (makin tinggi = makin banyak memakai AI). Tiga dimensi lainnya
-        menunjukkan <strong>kualitas</strong> (makin tinggi = makin baik).
+        {language === "id" ? (
+          <>
+            Frekuensi &amp; Porsi Kontribusi menunjukkan{" "}
+            <strong>{copy.radarIntensity}</strong> (makin tinggi = makin banyak
+            memakai AI). Tiga dimensi lainnya menunjukkan{" "}
+            <strong>{copy.radarQuality}</strong> (makin tinggi = makin baik).
+          </>
+        ) : (
+          <>
+            Frequency &amp; AI Contribution show <strong>{copy.radarIntensity}</strong>{" "}
+            (higher means more AI use). The other three dimensions show{" "}
+            <strong>{copy.radarQuality}</strong> (higher means better).
+          </>
+        )}
       </p>
     </div>
   );

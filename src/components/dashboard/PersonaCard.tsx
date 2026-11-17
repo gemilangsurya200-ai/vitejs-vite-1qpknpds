@@ -1,9 +1,11 @@
 import { AlertTriangle, BookOpen, Compass, ShieldAlert, type LucideIcon } from "lucide-react";
 import type { PersonaType } from "../../types";
+import { translations, type Language } from "../../data/translations";
 
 interface PersonaCardProps {
   persona: PersonaType;
   description: string;
+  language: Language;
 }
 
 interface PersonaTheme {
@@ -65,9 +67,40 @@ const THEMES: Record<PersonaType, PersonaTheme> = {
   },
 };
 
-export default function PersonaCard({ persona, description }: PersonaCardProps) {
+export default function PersonaCard({
+  persona,
+  description,
+  language,
+}: PersonaCardProps) {
   const theme = THEMES[persona];
   const Icon = theme.icon;
+  const copy = translations[language];
+  const localized: Record<
+    PersonaType,
+    { status: string; description: string; implication: string }
+  > = {
+    "Strategic Co-Pilot": {
+      status: copy.personaStatusStrategic,
+      description: copy.descriptionStrategic,
+      implication: copy.implicationStrategic,
+    },
+    "Ethical Pragmatist": {
+      status: copy.personaStatusPragmatic,
+      description: copy.descriptionPragmatic,
+      implication: copy.implicationPragmatic,
+    },
+    "Vulnerable Dependent": {
+      status: copy.personaStatusDependent,
+      description: copy.descriptionDependent,
+      implication: copy.implicationDependent,
+    },
+    "High-Risk Shortcutter": {
+      status: copy.personaStatusHighRisk,
+      description: copy.descriptionHighRisk,
+      implication: copy.implicationHighRisk,
+    },
+  };
+  const text = localized[persona];
 
   return (
     <article className={`rounded-xl2 border p-5 shadow-card sm:p-6 ${theme.card}`}>
@@ -82,10 +115,10 @@ export default function PersonaCard({ persona, description }: PersonaCardProps) 
           <span
             className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${theme.badge}`}
           >
-            {theme.status}
+            {text.status}
           </span>
           <p className="mt-2 text-xs font-medium uppercase tracking-wider text-slate-500">
-            Persona Anda
+            {copy.personaYou}
           </p>
           <h3 className={`font-display text-2xl font-extrabold ${theme.title}`}>
             {persona}
@@ -93,14 +126,16 @@ export default function PersonaCard({ persona, description }: PersonaCardProps) 
         </div>
       </div>
 
-      <p className="mt-4 text-sm leading-relaxed text-slate-700">{description}</p>
+      <p className="mt-4 text-sm leading-relaxed text-slate-700">
+        {language === "id" ? description : text.description}
+      </p>
 
       <div className={`mt-5 border-t pt-4 ${theme.divider}`}>
         <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Implikasi bagi kebiasaan belajar
+          {copy.implicationHeading}
         </p>
         <p className="mt-1.5 text-sm leading-relaxed text-slate-700">
-          {theme.implication}
+          {language === "id" ? theme.implication : text.implication}
         </p>
       </div>
     </article>

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { BarChart3, ShieldCheck, TrendingUp, type LucideIcon } from "lucide-react";
+import LanguageToggle from "../LanguageToggle";
+import type { Language } from "../../data/translations";
 
 interface Pillar {
   icon: LucideIcon;
@@ -15,9 +17,15 @@ const PILLARS: Pillar[] = [
 
 interface AuthLayoutProps {
   children: ReactNode;
+  language: Language;
+  onLanguageChange: (language: Language) => void;
 }
 
-export default function AuthLayout({ children }: AuthLayoutProps) {
+export default function AuthLayout({
+  children,
+  language,
+  onLanguageChange,
+}: AuthLayoutProps) {
   return (
     <div className="grid min-h-screen grid-cols-1 bg-slate-50 lg:grid-cols-2">
       {/* Brand Panel */}
@@ -34,11 +42,12 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
         <div className="relative my-10 lg:my-0">
           <h1 className="font-display text-4xl font-extrabold leading-tight sm:text-5xl">
-            Understand your AI usage.
+            {language === "id" ? "Pahami penggunaan AI Anda." : "Understand your AI usage."}
           </h1>
           <p className="mt-4 max-w-md text-base leading-relaxed text-primary-100 sm:text-lg">
-            Track how you use AI platforms for your semester and build better
-            academic habits.
+            {language === "id"
+              ? "Pantau penggunaan platform AI selama semester dan bangun kebiasaan akademik yang lebih baik."
+              : "Track how you use AI platforms for your semester and build better academic habits."}
           </p>
 
           <ul className="mt-10 space-y-5">
@@ -63,7 +72,10 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
       {/* Form Panel */}
       <main className="flex items-center justify-center px-4 py-10 sm:px-8">
-        <div className="w-full max-w-md rounded-xl2 border border-slate-100 bg-white p-8 shadow-card sm:p-10">
+        <div className="w-full max-w-md rounded-xl2 border border-slate-100 bg-white p-6 shadow-card sm:p-10">
+          <div className="mb-6 flex justify-end">
+            <LanguageToggle language={language} onChange={onLanguageChange} />
+          </div>
           {children}
         </div>
       </main>

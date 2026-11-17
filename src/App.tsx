@@ -4,6 +4,8 @@ import LoginForm from "./components/auth/LoginForm";
 import RegisterForm, { type RegisterData } from "./components/auth/RegisterForm";
 import AssessmentWizard from "./components/assessment/AssessmentWizard";
 import Dashboard from "./pages/Dashboard";
+import AdminDashboardView from "./pages/AdminDashboardView";
+import type { Language } from "./data/translations";
 import {
   buildUserId,
   clearUser,
@@ -20,7 +22,7 @@ import {
 } from "./utils/scoringEngine";
 import type { AssessmentAnswer, AssessmentResult, UserProfile } from "./types";
 
-type View = "auth" | "assessment" | "dashboard";
+type View = "auth" | "assessment" | "dashboard" | "admin";
 type AuthMode = "login" | "register";
 
 const createId = (): string =>
@@ -38,6 +40,7 @@ export default function App() {
     return getLatestAssessment() ? "dashboard" : "assessment";
   });
   const [authMode, setAuthMode] = useState<AuthMode>("login");
+  const [language, setLanguage] = useState<Language>("id");
 
   /** Set sesi, lalu arahkan ke dashboard (jika sudah punya hasil) atau asesmen. */
   const startSession = (profile: UserProfile) => {
@@ -57,11 +60,14 @@ export default function App() {
     startSession(profile);
   };
 
+  const handleAdminLogin = () => setView("admin");
+
   const handleRegister = (data: RegisterData) => {
     startSession({
       id: buildUserId(data.email),
       email: data.email.trim(),
       academicYear: data.academicYear,
+      fullName: data.fullName,
     });
   };
 
@@ -93,18 +99,31 @@ export default function App() {
 
   /* ───────── Render ───────── */
 
+  if (view === "admin") {
+    return (
+      <AdminDashboardView
+        onLogout={handleLogout}
+        language={language}
+        onLanguageChange={setLanguage}
+      />
+    );
+  }
+
   if (view === "auth" || !user) {
     return (
-      <AuthLayout>
+      <AuthLayout language={language} onLanguageChange={setLanguage}>
         {authMode === "login" ? (
           <LoginForm
             onLoginSuccess={handleLogin}
             onSwitchToRegister={() => setAuthMode("register")}
+            onAdminLogin={handleAdminLogin}
+            language={language}
           />
         ) : (
           <RegisterForm
             onRegisterSuccess={handleRegister}
             onSwitchToLogin={() => setAuthMode("login")}
+            language={language}
           />
         )}
       </AuthLayout>
@@ -118,6 +137,8 @@ export default function App() {
         result={result}
         onNewAssessment={() => setView("assessment")}
         onLogout={handleLogout}
+        language={language}
+        onLanguageChange={setLanguage}
       />
     );
   }
@@ -127,6 +148,8 @@ export default function App() {
       onComplete={handleAssessmentComplete}
       // Batal hanya tersedia jika sudah ada hasil sebelumnya untuk dikembalikan
       onCancel={result ? () => setView("dashboard") : undefined}
+      language={language}
+      onLanguageChange={setLanguage}
     />
   );
 }

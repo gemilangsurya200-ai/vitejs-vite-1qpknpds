@@ -1,14 +1,19 @@
+import { translations, type Language } from "../../data/translations";
+
 interface ProgressBarProps {
   currentStep: number;
   totalSteps: number;
   stepTitle?: string;
+  language: Language;
 }
 
 export default function ProgressBar({
   currentStep,
   totalSteps,
   stepTitle,
+  language,
 }: ProgressBarProps) {
+  const copy = translations[language];
   const percent = Math.min(100, Math.max(0, (currentStep / totalSteps) * 100));
 
   return (
@@ -16,7 +21,7 @@ export default function ProgressBar({
       <div className="mb-3 flex items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-primary-600">
-            Step {currentStep} of {totalSteps}
+            {copy.assessmentStep} {currentStep} {copy.of} {totalSteps}
           </p>
           {stepTitle && (
             <h2 className="mt-1 font-display text-lg font-bold text-slate-900 sm:text-xl">
@@ -34,7 +39,7 @@ export default function ProgressBar({
         aria-valuemin={0}
         aria-valuemax={totalSteps}
         aria-valuenow={currentStep}
-        aria-label={`Langkah ${currentStep} dari ${totalSteps}`}
+        aria-label={`${copy.assessmentStep} ${currentStep} ${copy.of} ${totalSteps}`}
         className="h-2 w-full overflow-hidden rounded-full bg-primary-100"
       >
         <div

@@ -1,5 +1,6 @@
 import { useId, useState, type FormEvent } from "react";
 import { ArrowRight, Eye, EyeOff, GraduationCap, Lock, Mail, User } from "lucide-react";
+import { translations, type Language } from "../../data/translations";
 
 export interface RegisterData {
   fullName: string;
@@ -11,6 +12,7 @@ export interface RegisterData {
 interface RegisterFormProps {
   onRegisterSuccess: (userData: RegisterData) => void;
   onSwitchToLogin: () => void;
+  language: Language;
 }
 
 const SEMESTER_OPTIONS = [
@@ -29,7 +31,13 @@ const labelBase = "mb-1.5 block text-sm font-medium text-slate-700";
 export default function RegisterForm({
   onRegisterSuccess,
   onSwitchToLogin,
+  language,
 }: RegisterFormProps) {
+  const copy = translations[language];
+  const semesterLabels =
+    language === "id"
+      ? SEMESTER_OPTIONS
+      : ["Semesters 1–2", "Semesters 3–4", "Semesters 5–6", "Above semester 6"];
   const nameId = useId();
   const emailId = useId();
   const semId = useId();
@@ -46,11 +54,11 @@ export default function RegisterForm({
     e.preventDefault();
 
     if (!fullName.trim() || !email.trim() || !academicYear || !password) {
-      setError("Please complete all fields.");
+      setError(copy.completeFields);
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError(copy.passwordLength);
       return;
     }
 
@@ -67,17 +75,17 @@ export default function RegisterForm({
     <div>
       <div className="mb-8">
         <h2 className="font-display text-2xl font-bold text-slate-900">
-          Create your account
+          {copy.createAccountTitle}
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Start tracking your AI usage this semester.
+          {copy.createAccountSubtitle}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
         {/* Full name */}
         <div>
-          <label htmlFor={nameId} className={labelBase}>Full Name</label>
+          <label htmlFor={nameId} className={labelBase}>{copy.fullName}</label>
           <div className="relative">
             <User className={iconBase} />
             <input
@@ -86,7 +94,7 @@ export default function RegisterForm({
               autoComplete="name"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Your full name"
+              placeholder={copy.fullName}
               className={`${inputBase} pr-3`}
             />
           </div>
@@ -94,7 +102,7 @@ export default function RegisterForm({
 
         {/* Email / Student ID */}
         <div>
-          <label htmlFor={emailId} className={labelBase}>Email / Student ID</label>
+          <label htmlFor={emailId} className={labelBase}>{copy.emailStudentId}</label>
           <div className="relative">
             <Mail className={iconBase} />
             <input
@@ -111,7 +119,7 @@ export default function RegisterForm({
 
         {/* Semester */}
         <div>
-          <label htmlFor={semId} className={labelBase}>Academic Level</label>
+          <label htmlFor={semId} className={labelBase}>{copy.academicLevel}</label>
           <div className="relative">
             <GraduationCap className={iconBase} />
             <select
@@ -123,11 +131,11 @@ export default function RegisterForm({
               }`}
             >
               <option value="" disabled>
-                Select semester
+                {copy.selectSemester}
               </option>
-              {SEMESTER_OPTIONS.map((s) => (
+              {SEMESTER_OPTIONS.map((s, index) => (
                 <option key={s} value={s} className="text-slate-900">
-                  {s}
+                  {semesterLabels[index]}
                 </option>
               ))}
             </select>
@@ -136,7 +144,7 @@ export default function RegisterForm({
 
         {/* Password */}
         <div>
-          <label htmlFor={pwId} className={labelBase}>Password</label>
+          <label htmlFor={pwId} className={labelBase}>{copy.password}</label>
           <div className="relative">
             <Lock className={iconBase} />
             <input
@@ -145,13 +153,13 @@ export default function RegisterForm({
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min. 8 characters"
+              placeholder={copy.minimumPassword}
               className={`${inputBase} pr-11`}
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? copy.hidePassword : copy.showPassword}
               className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -169,19 +177,19 @@ export default function RegisterForm({
           type="submit"
           className="group flex w-full items-center justify-center gap-2 rounded-lg bg-brand-gradient px-4 py-3 text-sm font-semibold text-white shadow-md shadow-primary-600/25 transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 active:scale-[0.99]"
         >
-          Create Account
+          {copy.createAccountButton}
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
         </button>
       </form>
 
       <p className="mt-8 text-center text-sm text-slate-500">
-        Already have an account?{" "}
+        {copy.alreadyAccount}{" "}
         <button
           type="button"
           onClick={onSwitchToLogin}
           className="font-semibold text-primary-600 hover:text-primary-700"
         >
-          Sign in
+          {copy.signIn}
         </button>
       </p>
     </div>

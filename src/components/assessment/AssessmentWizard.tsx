@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, BarChart3 } from "lucide-react";
 import { QUESTIONS, QUESTION_MAP } from "../../data/questions";
+import LanguageToggle from "../LanguageToggle";
+import { translations, type Language } from "../../data/translations";
 import type { AssessmentAnswer } from "../../types";
 import ProgressBar from "./ProgressBar";
 import QuestionItem from "./QuestionItem";
@@ -8,6 +10,8 @@ import QuestionItem from "./QuestionItem";
 interface AssessmentWizardProps {
   onComplete: (answers: AssessmentAnswer[]) => void;
   onCancel?: () => void;
+  language: Language;
+  onLanguageChange: (language: Language) => void;
 }
 
 interface WizardStep {
@@ -25,7 +29,10 @@ const STEPS: WizardStep[] = [
 export default function AssessmentWizard({
   onComplete,
   onCancel,
+  language,
+  onLanguageChange,
 }: AssessmentWizardProps) {
+  const copy = translations[language];
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
@@ -70,11 +77,15 @@ export default function AssessmentWizard({
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-8 sm:py-12">
       <div className="mx-auto w-full max-w-2xl">
+        <div className="mb-4 flex justify-end">
+          <LanguageToggle language={language} onChange={onLanguageChange} />
+        </div>
         <div className="rounded-xl2 border border-slate-100 bg-white p-6 shadow-card sm:p-8">
           <ProgressBar
             currentStep={stepIndex + 1}
             totalSteps={STEPS.length}
-            stepTitle={step.title}
+            stepTitle={copy.stepTitles[stepIndex]}
+            language={language}
           />
 
           <div className="mt-8 space-y-8">
@@ -96,7 +107,7 @@ export default function AssessmentWizard({
               className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <ArrowLeft className="h-4 w-4" />
-              Kembali
+              {copy.back}
             </button>
 
             <button
@@ -107,12 +118,12 @@ export default function AssessmentWizard({
             >
               {isLastStep ? (
                 <>
-                  Lihat Hasil Analisis
+                  {copy.seeResults}
                   <BarChart3 className="h-4 w-4" />
                 </>
               ) : (
                 <>
-                  Lanjut
+                  {copy.next}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </>
               )}
@@ -122,7 +133,7 @@ export default function AssessmentWizard({
 
         {!isStepComplete && (
           <p className="mt-4 text-center text-xs text-slate-500">
-            Jawab semua pertanyaan pada tahap ini untuk melanjutkan.
+            {copy.answerAll}
           </p>
         )}
       </div>

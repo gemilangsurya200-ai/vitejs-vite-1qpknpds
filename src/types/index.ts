@@ -3,6 +3,12 @@ export interface UserProfile {
   id: string;
   email: string;
   academicYear: string; // contoh: "2024/2025" atau "Semester 3"
+  fullName?: string;
+}
+
+export interface StudentAssessmentRecord {
+  user: UserProfile;
+  result: AssessmentResult;
 }
 
 /** Dimensi penilaian */

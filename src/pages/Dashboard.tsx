@@ -1,15 +1,19 @@
 import { Gauge, GraduationCap, LogOut, RefreshCw } from "lucide-react";
+import LanguageToggle from "../components/LanguageToggle";
 import PersonaCard from "../components/dashboard/PersonaCard";
 import RadarChartWidget from "../components/dashboard/RadarChartWidget";
 import RecommendationList from "../components/dashboard/RecommendationList";
 import { determinePersona } from "../utils/scoringEngine";
 import type { AssessmentResult, UserProfile } from "../types";
+import { translations, type Language } from "../data/translations";
 
 interface DashboardProps {
   user: UserProfile;
   result: AssessmentResult;
   onNewAssessment: () => void;
   onLogout: () => void;
+  language: Language;
+  onLanguageChange: (language: Language) => void;
 }
 
 export default function Dashboard({
@@ -17,14 +21,20 @@ export default function Dashboard({
   result,
   onNewAssessment,
   onLogout,
+  language,
+  onLanguageChange,
 }: DashboardProps) {
+  const copy = translations[language];
   const { description } = determinePersona(result.dimensionScores);
 
-  const assessedAt = new Date(result.timestamp).toLocaleDateString("id-ID", {
+  const assessedAt = new Date(result.timestamp).toLocaleDateString(
+    language === "id" ? "id-ID" : "en-US",
+    {
     day: "numeric",
     month: "long",
     year: "numeric",
-  });
+    }
+  );
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -40,7 +50,7 @@ export default function Dashboard({
             </span>
           </div>
 
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <div className="hidden min-w-0 text-right sm:block">
               <p className="max-w-[200px] truncate text-sm font-semibold text-slate-800">
                 {user.email}
@@ -50,13 +60,14 @@ export default function Dashboard({
                 {user.academicYear}
               </p>
             </div>
+            <LanguageToggle language={language} onChange={onLanguageChange} />
             <button
               type="button"
               onClick={onLogout}
               className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />
-              <span className="hidden sm:inline">Logout</span>
+              <span className="hidden sm:inline">{copy.logout}</span>
             </button>
           </div>
         </div>
@@ -67,10 +78,10 @@ export default function Dashboard({
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="font-display text-2xl font-extrabold text-slate-900 sm:text-3xl">
-              Hasil Analisis Penggunaan AI
+              {copy.dashboardTitle}
             </h1>
             <p className="mt-1 text-sm text-slate-500">
-              Asesmen terakhir: {assessedAt}
+              {copy.lastAssessment}: {assessedAt}
             </p>
           </div>
 
@@ -80,20 +91,25 @@ export default function Dashboard({
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary-600/25 transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 active:scale-[0.99]"
           >
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
-            Mulai Asesmen Baru
+            {copy.newAssessment}
           </button>
         </div>
 
         {/* Grid 2 kolom */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
           <div className="space-y-6">
-            <PersonaCard persona={result.persona} description={description} />
-            <RadarChartWidget scores={result.dimensionScores} />
+            <PersonaCard
+              persona={result.persona}
+              description={description}
+              language={language}
+            />
+            <RadarChartWidget scores={result.dimensionScores} language={language} />
           </div>
 
           <RecommendationList
             weakestDimension={result.dominantWeakness}
             scores={result.dimensionScores}
+            language={language}
           />
         </div>
       </main>
